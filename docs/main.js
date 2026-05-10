@@ -1,4 +1,4 @@
-const VERTIMIENTO_MWH = 13514;
+const VERTIMIENTO_MWH = 14665; // ERNC (solar + eólica), 6 enero 2024
 
 // Consumo diario de cada referencia (MWh/día)
 // Hospital: 100 kW solar = 2% consumo (MINENERGIA 2017) + rendimiento solar Santiago ~1.700 kWh/kWp/año → 8.500 MWh/año

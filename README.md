@@ -16,7 +16,7 @@ Cuando eso ocurre, los operadores ordenan reducir o detener la generación. La e
 
 ## Qué muestra
 
-La visualización muestra cuánta energía solar se vertió.
+La visualización muestra cuánta energía renovable se vertió.
 
 Para hacer tangible esa cifra, se muestra a cuántas semanas de funcionamiento equivale respecto a tres referencias de consumo eléctrico conocidas en Santiago:
 
@@ -37,7 +37,7 @@ Para hacer tangible esa cifra, se muestra a cuántas semanas de funcionamiento e
 - Endpoint demanda: `demanda-programada-pcp/v4/findByDate`
 - Fecha: 6 de enero de 2024
 
-**Proxy de vertimiento:** `max(0, capacidad_disponible_mw − gen_programada_mw)` para plantas solares (`tipo_tecnologia == "Solares"`), agregado por región.
+**Proxy de vertimiento:** `max(0, capacidad_disponible_mw − gen_programada_mw)` para plantas renovables de costo marginal ≈ 0 (`tipo_tecnologia` en `"Solares"` o `"Eólicas"`), agregado por región.
 
 El vertimiento corresponde principalmente a las regiones del norte: Arica y Parinacota, Tarapacá, Antofagasta y Atacama.
 
@@ -80,12 +80,6 @@ Desde 2023, el Metro opera con **100 % de energía renovable** (certificación I
 
 **Fuente:** Metro de Santiago, Memoria Integrada 2024, sección 8.3.10, GRI 302-1, p. 191.
 
----
-
-## Implementación
-
-- HTML + CSS + JavaScript vanilla. Sin frameworks ni bundler.
-- Íconos: [Lucide](https://lucide.dev/) vía CDN.
 ---
 
 ## Contexto académico
