@@ -7,27 +7,27 @@ const VERTIMIENTO_MWH = 13514;
 const EQUIVALENCIAS = [
   {
     nombre: "Hospital Barros Luco",
-    emoji: "🏥",
-    color: "#e05c5c",
+    icon: "hospital",
+    color: "#0000FF",
     consumo_dia_mwh: 15.07,
     cols: 16,
     fuente: "Derivado: techo solar 100 kW cubre el 2% del consumo anual"
   },
   {
     nombre: "Aeropuerto de Santiago",
-    emoji: "✈️",
-    color: "#4a90d9",
+    icon: "plane",
+    color: "#0000FF",
     consumo_dia_mwh: 287.7,
-    cols: 7,
+    cols: 1,
     fuente: "Contrato ENGIE–Nuevo Pudahuel (2018): 105 GWh/año"
   },
   {
     nombre: "Metro de Santiago",
-    emoji: "🚇",
-    color: "#e05c5c",
+    icon: "train-front-tunnel",
+    color: "#0000FF",
     consumo_dia_mwh: 821.9,
-    cols: 2,
-    fuente: "Memoria Anual Metro de Santiago: ~300 GWh/año"
+    cols: 1,
+    fuente: "Memoria Anual Metro de Santiago: 300 GWh/año"
   }
 ];
 
@@ -36,22 +36,20 @@ function renderEquivalencia(eq) {
   const semanas = Math.round(dias / 7);
   const anios = semanas / 52;
 
-  const duracionLabel = `~${semanas} semanas`;
-  const aniosLabel = anios >= 1 ? `~${anios.toFixed(1)} años` : "";
+  const duracionLabel = `${semanas} semanas`;
 
   let iconsHTML = "";
   for (let i = 0; i < semanas; i++) {
-    iconsHTML += `<span class="icon-week" style="background:${eq.color}" title="${eq.nombre} — semana ${i + 1} de ${semanas}">${eq.emoji}</span>`;
+    iconsHTML += `<span class="icon-week" title="${eq.nombre} — semana ${i + 1} de ${semanas}"><i data-lucide="${eq.icon}"></i></span>`;
   }
 
   return `
     <div class="equivalence">
       <div class="equiv-label">
-        <div class="equiv-name">${eq.emoji} ${eq.nombre}</div>
         <div class="equiv-duration" style="color:${eq.color}">
           ${duracionLabel}
-          ${aniosLabel ? `<span class="equiv-years">${aniosLabel}</span>` : ""}
         </div>
+        <div class="equiv-name">${eq.nombre}</div>
         <div class="equiv-note">${eq.fuente}</div>
       </div>
       <div class="equiv-icons" style="--cols: ${eq.cols}">
@@ -65,6 +63,7 @@ function renderPictograma() {
   const container = document.getElementById("pictogram");
   if (!container) return;
   container.innerHTML = EQUIVALENCIAS.map(renderEquivalencia).join("\n");
+  if (window.lucide) lucide.createIcons();
 }
 
 document.addEventListener("DOMContentLoaded", renderPictograma);
