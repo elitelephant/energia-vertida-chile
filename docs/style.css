@@ -130,7 +130,7 @@ h1 {
   display: flex;
   flex-direction: row;
   gap: clamp(16px, 2vw, 24px);
-  align-items: flex-start;
+  align-items: center;
   padding: clamp(10px, 1.2vh, 18px) 0;
   border-bottom: 1px solid #d9d9d9;
 }
@@ -160,20 +160,15 @@ h1 {
   letter-spacing: -0.02em;
 }
 
-.equiv-years {
-  display: block;
-  font-size: clamp(0.68rem, 0.85vw, 0.78rem);
-  font-weight: 600;
-  margin-top: 3px;
-  opacity: 0.85;
-  color: inherit;
-}
 
-.equiv-note {
+.equiv-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 5px;
   font-size: clamp(0.58rem, 0.75vw, 0.66rem);
   color: #666;
-  line-height: 1.4;
-  margin-top: 5px;
+  line-height: 1.5;
 }
 
 .equiv-icons {
@@ -224,11 +219,22 @@ h1 {
 
 /* ── Footer ──────────────────────────────────────────── */
 
-footer p {
-  font-size: clamp(0.58rem, 0.75vw, 0.66rem);
+footer {
+  border-top: 1px solid #d9d9d9;
+  padding-top: clamp(8px, 1vw, 12px);
+}
+
+footer p,
+footer li {
+  font-size: clamp(0.62rem, 0.8vw, 0.72rem);
   color: #777;
   line-height: 1.6;
-  text-align: center;
+}
+
+footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 2px 0 6px;
 }
 
 /* ── Responsive: pantallas pequeñas ─────────────────── */
