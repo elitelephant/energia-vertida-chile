@@ -16,11 +16,62 @@
 
     <div id="panels">
 
+      <div id="panel-calendar">
+        <div class="panel-header">
+          <p class="panel-label">Enero 2024</p>
+          <div class="view-toggle">
+            <button id="btn-calendar" class="active">Calendario</button>
+            <button id="btn-timeline">Timeline</button>
+          </div>
+        </div>
+        <div id="selector-viz"></div>
+
+        <div id="audio-players">
+          <p class="panel-label" style="margin-top: 8px">Sonido de referencia</p>
+          <div class="audio-player" data-ref="hospital">
+            <div class="audio-info">
+              <i data-lucide="hospital"></i>
+              <span>Hospital Barros Luco</span>
+            </div>
+            <div class="audio-controls">
+              <button class="audio-play-btn" title="Reproducir">
+                <i data-lucide="play"></i>
+              </button>
+              <div class="audio-scrubber"><div class="audio-fill"></div></div>
+            </div>
+          </div>
+          <div class="audio-player" data-ref="aeropuerto">
+            <div class="audio-info">
+              <i data-lucide="plane"></i>
+              <span>Aeropuerto de Santiago</span>
+            </div>
+            <div class="audio-controls">
+              <button class="audio-play-btn" title="Reproducir">
+                <i data-lucide="play"></i>
+              </button>
+              <div class="audio-scrubber"><div class="audio-fill"></div></div>
+            </div>
+          </div>
+          <div class="audio-player" data-ref="metro">
+            <div class="audio-info">
+              <i data-lucide="train-front-tunnel"></i>
+              <span>Metro de Santiago</span>
+            </div>
+            <div class="audio-controls">
+              <button class="audio-play-btn" title="Reproducir">
+                <i data-lucide="play"></i>
+              </button>
+              <div class="audio-scrubber"><div class="audio-fill"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="panel-loss">
         <p class="panel-label">Energía generada en exceso que se perdió</p>
-        <p class="loss-number">14.665 MWh</p>
-        <p class="loss-sub">vertidos el 6 de enero de 2024</p>
-        <p class="loss-context">el 7% de toda la energía generada en Chile ese día</p>
+        <p class="loss-number" id="loss-number">14.665 MWh</p>
+        <p class="loss-sub" id="loss-sub">vertidos el 6 de enero de 2024</p>
+        <p class="loss-context" id="loss-context">el 7% de toda la energía generada ese día</p>
       </div>
 
       <div id="panel-equiv">
@@ -42,6 +93,7 @@
 
   </main>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="data/daily_totals.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
