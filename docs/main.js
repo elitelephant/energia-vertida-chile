@@ -32,6 +32,7 @@ function init() {
   renderSelector();
   updatePanel();
   renderEquiv();
+  lucide.createIcons();
 }
 
 function selectAll() {
@@ -149,11 +150,11 @@ function renderEquiv() {
 
 // ── Sonido ────────────────────────────────────────────────────────────────────
 
-const VERT_MIN = 9000;
-const VERT_MAX = 470000;
-const N_MIN    = 2;
-const N_MAX    = 10;
-const WINDOW_S = 2.5;
+const VERT_MIN  = 9000;
+const VERT_MAX  = 470000;
+const N_MIN     = 2;
+const N_MAX     = 10;
+const SPACING_S = 0.6;
 
 let audioCtx          = null;
 let audioBuffer       = null;
@@ -192,7 +193,8 @@ function stopFiums() {
   activeSources = [];
   const btn = document.getElementById("btn-play-sound");
   btn.classList.remove("playing");
-  btn.textContent = "▶ Escuchar";
+  btn.innerHTML = '<i data-lucide="volume-2"></i> Escuchar';
+  lucide.createIcons({ nodes: [btn] });
 }
 
 function playFiums() {
@@ -201,27 +203,27 @@ function playFiums() {
     const n = calcN(vertMwh);
     if (n === 0) return;
 
-    const ctx          = ensureAudioCtx();
-    const spacing      = WINDOW_S / n;
-    const playbackRate = buf.duration / spacing;
-    const btn          = document.getElementById("btn-play-sound");
+    const ctx = ensureAudioCtx();
+    const btn = document.getElementById("btn-play-sound");
     btn.classList.add("playing");
-    btn.textContent = "■ Detener";
+    btn.innerHTML = '<i data-lucide="volume-x"></i> Detener';
+    lucide.createIcons({ nodes: [btn] });
 
     for (let i = 0; i < n; i++) {
       const src = ctx.createBufferSource();
       src.buffer = buf;
-      src.playbackRate.value = playbackRate;
+      src.playbackRate.value = 1;
       src.connect(ctx.destination);
-      src.start(ctx.currentTime + i * spacing);
+      src.start(ctx.currentTime + i * SPACING_S);
       activeSources.push(src);
     }
 
+    const totalMs = ((n - 1) * SPACING_S + buf.duration) * 1000 + 200;
     setTimeout(() => {
       activeSources = [];
       btn.classList.remove("playing");
       btn.textContent = "▶ Escuchar";
-    }, WINDOW_S * 1000 + 200);
+    }, totalMs);
   });
 }
 

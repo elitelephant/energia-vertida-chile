@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Energía vertida en Chile</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <main>
@@ -17,16 +18,16 @@
     <div id="panels">
 
       <div id="panel-calendar">
-        <div class="panel-header">
+        <div class="cal-main">
           <p class="panel-label">Enero 2024</p>
+          <div id="selector-viz"></div>
           <div class="cal-actions">
             <button id="btn-select-all">Seleccionar todo</button>
             <button id="btn-clear-all">Limpiar</button>
           </div>
         </div>
-        <div id="selector-viz"></div>
         <div id="sound-control">
-          <button id="btn-play-sound">▶ Escuchar</button>
+          <button id="btn-play-sound"><i data-lucide="volume-2"></i> Escuchar</button>
         </div>
       </div>
 
