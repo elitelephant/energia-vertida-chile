@@ -10,8 +10,8 @@
   <main>
 
     <header>
-      <h1>El norte de Chile derrocha energía</h1>
-      <p class="causa">Chile tiene un desafío. El norte genera más energía renovable de la que puede consumir. El sol y el viento son abundantes, y las plantas generan a plena capacidad. Pero la red eléctrica que conecta el norte con el sur, donde está la mayor parte del consumo, no tiene capacidad suficiente para transportar todo ese exceso. Cuando eso ocurre, la energía simplemente se pierde. A eso se le llama <strong>vertimiento</strong>.</p>
+      <h1>El vertimiento de energía en enero de 2024</h1>
+      <p class="causa">En el norte de Chile, las plantas renovables generan más energía de la que la red puede transportar. Cuando eso ocurre, el exceso que no puede transmitirse simplemente se pierde. A eso se le llama <strong>vertimiento</strong>. En enero de 2024, ese desperdicio fue significativo.</p>
     </header>
 
     <div id="panels">
@@ -19,51 +19,14 @@
       <div id="panel-calendar">
         <div class="panel-header">
           <p class="panel-label">Enero 2024</p>
-          <div class="view-toggle">
-            <button id="btn-calendar" class="active">Calendario</button>
-            <button id="btn-timeline">Timeline</button>
+          <div class="cal-actions">
+            <button id="btn-select-all">Seleccionar todo</button>
+            <button id="btn-clear-all">Limpiar</button>
           </div>
         </div>
         <div id="selector-viz"></div>
-
-        <div id="audio-players">
-          <p class="panel-label" style="margin-top: 8px">Sonido de referencia</p>
-          <div class="audio-player" data-ref="hospital">
-            <div class="audio-info">
-              <i data-lucide="hospital"></i>
-              <span>Hospital Barros Luco</span>
-            </div>
-            <div class="audio-controls">
-              <button class="audio-play-btn" title="Reproducir">
-                <i data-lucide="play"></i>
-              </button>
-              <div class="audio-scrubber"><div class="audio-fill"></div></div>
-            </div>
-          </div>
-          <div class="audio-player" data-ref="aeropuerto">
-            <div class="audio-info">
-              <i data-lucide="plane"></i>
-              <span>Aeropuerto de Santiago</span>
-            </div>
-            <div class="audio-controls">
-              <button class="audio-play-btn" title="Reproducir">
-                <i data-lucide="play"></i>
-              </button>
-              <div class="audio-scrubber"><div class="audio-fill"></div></div>
-            </div>
-          </div>
-          <div class="audio-player" data-ref="metro">
-            <div class="audio-info">
-              <i data-lucide="train-front-tunnel"></i>
-              <span>Metro de Santiago</span>
-            </div>
-            <div class="audio-controls">
-              <button class="audio-play-btn" title="Reproducir">
-                <i data-lucide="play"></i>
-              </button>
-              <div class="audio-scrubber"><div class="audio-fill"></div></div>
-            </div>
-          </div>
+        <div id="sound-control">
+          <button id="btn-play-sound">▶ Escuchar</button>
         </div>
       </div>
 
@@ -75,8 +38,8 @@
       </div>
 
       <div id="panel-equiv">
-        <p class="panel-label">Con esa energía se podría haber alimentado durante:</p>
-        <section id="pictogram"></section>
+        <p class="panel-label">Equivale a alimentar durante</p>
+        <div id="equiv-display"></div>
       </div>
 
     </div>
@@ -85,14 +48,11 @@
       <p><strong>Fuentes:</strong></p>
       <ul>
         <li>Generación y demanda: Coordinador Eléctrico Nacional</li>
-        <li>Hospital Barros Luco: Ministerio de Energía</li>
         <li>Aeropuerto de Santiago: Reporte de Sostenibilidad 2024, Nuevo Pudahuel</li>
-        <li>Metro de Santiago: Memoria Integrada 2024, Metro de Santiago</li>
       </ul>
     </footer>
 
   </main>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="data/daily_totals.js"></script>
   <script src="main.js"></script>
 </body>

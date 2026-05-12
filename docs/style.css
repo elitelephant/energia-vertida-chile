@@ -5,9 +5,7 @@
 }
 
 :root {
-  --icon-size: min(clamp(11px, 1.5vw, 18px), clamp(10px, 1.9vh, 18px));
-  --icon-gap:  clamp(2px, 0.3vw, 3px);
-  --accent:    #0000FF;
+  --accent: #0000FF;
 }
 
 body {
@@ -22,9 +20,9 @@ body {
 
 main {
   flex: 1;
-  width: min(1080px, 100%);
+  width: min(80%, 1400px);
   margin: 0 auto;
-  padding: clamp(14px, 1.8vw, 24px) clamp(16px, 2.5vw, 36px) clamp(8px, 1vw, 14px);
+  padding: clamp(20px, 2.2vw, 32px) clamp(16px, 2.5vw, 36px) clamp(8px, 1vw, 14px);
   display: flex;
   flex-direction: column;
   gap: clamp(10px, 1.4vw, 16px);
@@ -67,8 +65,8 @@ h1 {
 
 .panel-label {
   font-size: clamp(0.58rem, 0.75vw, 0.68rem);
-  font-weight: 600;
-  color: #555;
+  font-weight: 400;
+  color: #888;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -83,21 +81,25 @@ h1 {
 /* ── Panel calendario (izquierda) ────────────────────── */
 
 #panel-calendar {
-  flex: 32;
+  flex: 25;
+  min-height: 280px;
   background: #f0f0f0;
   border-radius: 10px;
   padding: clamp(12px, 1.5vw, 18px);
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
-.view-toggle {
+/* ── Botones calendario ──────────────────────────────── */
+
+.cal-actions {
   display: flex;
   gap: 3px;
   flex-shrink: 0;
 }
 
-.view-toggle button {
+.cal-actions button {
   font-size: 0.6rem;
   padding: 2px 8px;
   border-radius: 4px;
@@ -108,10 +110,9 @@ h1 {
   font-family: inherit;
 }
 
-.view-toggle button.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
+.cal-actions button:hover {
+  background: #e0e0e0;
+  border-color: #999;
 }
 
 /* ── Calendar heatmap ────────────────────────────────── */
@@ -132,7 +133,7 @@ h1 {
 }
 
 .cal-cell {
-  height: clamp(20px, 2.4vh, 28px);
+  aspect-ratio: 1;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -155,146 +156,39 @@ h1 {
   color: #111;
 }
 
-/* ── Timeline ────────────────────────────────────────── */
+/* ── Botón sonido ────────────────────────────────────── */
 
-.timeline-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: clamp(60px, 8vh, 80px);
-  user-select: none;
-  cursor: col-resize;
+#sound-control {
+  margin-top: 8px;
 }
 
-.tl-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-
-.tl-bar {
-  width: 100%;
-  background: rgba(0, 0, 255, 0.18);
-  border-radius: 2px 2px 0 0;
-  min-height: 2px;
-}
-
-.tl-col.selected .tl-bar { background: rgba(0, 0, 255, 0.85); }
-.tl-col:hover .tl-bar    { background: rgba(0, 0, 255, 0.4);  }
-.tl-col.selected:hover .tl-bar { background: rgba(0, 0, 200, 0.95); }
-
-.tl-label {
-  font-size: clamp(0.42rem, 0.55vw, 0.5rem);
-  color: #aaa;
-  line-height: 1;
-}
-
-.tl-label.weekend {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-/* ── Audio players ───────────────────────────────────── */
-
-#audio-players {
-  margin-top: auto;
-  padding-top: clamp(8px, 1vw, 12px);
-  border-top: 1px solid #d9d9d9;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.audio-player {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.audio-info {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: clamp(0.65rem, 0.85vw, 0.75rem);
-  color: #333;
-}
-
-.audio-info svg {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-  stroke: #555;
-}
-
-.audio-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.audio-play-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid #ccc;
-  background: #fff;
+#btn-play-sound {
+  font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  background: transparent;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #333;
+  color: #555;
+  font-family: inherit;
 }
 
-.audio-play-btn:hover {
-  background: #e8e8e8;
-  border-color: #aaa;
+#btn-play-sound:hover {
+  background: #e0e0e0;
+  border-color: #999;
 }
 
-.audio-play-btn svg {
-  width: 11px;
-  height: 11px;
-}
-
-/* Estado playing: fondo azul + ícono pause (dos barras) */
-.audio-player.playing .audio-play-btn {
+#btn-play-sound.playing {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
 
-.audio-player.playing .audio-play-btn svg {
-  display: none;
-}
-
-.audio-player.playing .audio-play-btn::after {
-  content: "⏸";
-  font-size: 11px;
-  line-height: 1;
-}
-
-.audio-scrubber {
-  flex: 1;
-  height: 4px;
-  background: #ddd;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.audio-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width 0.1s linear;
-}
-
 /* ── Panel número (centro) ───────────────────────────── */
 
 #panel-loss {
-  flex: 24;
+  flex: 25;
+  min-height: 280px;
   background: #ebebeb;
   border-radius: 10px;
   padding: clamp(14px, 1.8vw, 22px);
@@ -305,7 +199,7 @@ h1 {
 }
 
 .loss-number {
-  font-size: clamp(1.4rem, 3vw, 2.6rem);
+  font-size: clamp(1.2rem, 2.4vw, 2.2rem);
   font-weight: 900;
   color: #111;
   letter-spacing: -0.03em;
@@ -328,7 +222,8 @@ h1 {
 /* ── Panel equiv (derecha) ───────────────────────────── */
 
 #panel-equiv {
-  flex: 44;
+  flex: 50;
+  min-height: 280px;
   background: #ebebeb;
   border-radius: 10px;
   padding: clamp(12px, 1.5vw, 20px);
@@ -337,85 +232,26 @@ h1 {
   gap: 4px;
 }
 
-#pictogram {
+#equiv-display {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.equivalence {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  gap: clamp(16px, 2vw, 24px);
-  align-items: center;
-  padding: clamp(10px, 1.2vh, 18px) 0;
-  border-bottom: 1px solid #d9d9d9;
-}
-
-.equivalence:first-child { border-top: 1px solid #d9d9d9; }
-
-.equiv-label {
-  flex-shrink: 0;
-  width: clamp(120px, 12vw, 160px);
-}
-
-.equiv-name {
-  font-size: clamp(0.72rem, 0.95vw, 0.85rem);
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 4px;
-  line-height: 1.2;
-}
-
-.equiv-duration {
-  font-size: clamp(1rem, 1.6vw, 1.4rem);
-  font-weight: 900;
-  line-height: 1;
-  margin-bottom: 3px;
-  letter-spacing: -0.02em;
-}
-
-.equiv-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 5px;
-  font-size: clamp(0.55rem, 0.72vw, 0.63rem);
-  color: #666;
-  line-height: 1.5;
-}
-
-.equiv-icons {
-  display: grid;
-  grid-template-columns: repeat(var(--cols), var(--icon-size));
-  gap: var(--icon-gap);
-  flex: 1;
-  align-content: flex-start;
-}
-
-.icon-week {
-  width: var(--icon-size);
-  height: var(--icon-size);
-  display: flex;
-  align-items: center;
   justify-content: center;
-  color: #444;
-  opacity: 0.75;
-  user-select: none;
-  transition: opacity 0.15s;
+  gap: 10px;
 }
 
-.icon-week:hover { opacity: 1; }
+.equiv-numero {
+  font-size: clamp(3rem, 6.5vw, 5.5rem);
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
 
-.icon-week svg {
-  width: 100%;
-  height: 100%;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.equiv-lugar {
+  font-size: clamp(0.85rem, 1.3vw, 1.1rem);
+  font-weight: 600;
+  color: #333;
 }
 
 /* ── Footer ──────────────────────────────────────────── */
