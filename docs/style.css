@@ -266,10 +266,23 @@ h1 {
   line-height: 1;
 }
 
-.equiv-lugar {
-  font-size: clamp(0.85rem, 1.3vw, 1.1rem);
+.equiv-label {
+  font-size: clamp(0.9rem, 1.4vw, 1.15rem);
   font-weight: 600;
   color: #333;
+  margin-top: 4px;
+}
+
+.equiv-lugar {
+  font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+  font-weight: 600;
+  color: #555;
+  margin-top: 6px;
+}
+
+.equiv-sub {
+  font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+  color: #888;
 }
 
 /* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

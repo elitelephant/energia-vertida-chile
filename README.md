@@ -16,15 +16,20 @@ Cuando eso ocurre, los operadores ordenan reducir o detener la generación. La e
 
 ## Qué muestra
 
-La visualización muestra cuánta energía renovable se vertió.
+La visualización muestra cuánta energía renovable se vertió en enero de 2024, con interacción diaria y sonificación.
 
-Para hacer tangible esa cifra, se muestra a cuántas semanas de funcionamiento equivale respecto a tres referencias de consumo eléctrico conocidas en Santiago:
+**Interacción:** calendario heatmap con selección individual de días. Al seleccionar días, el número de MWh vertidos y la equivalencia se actualizan en tiempo real.
 
-| Referencia | Consumo eléctrico | Equivalencia |
+**Equivalencia:** la energía vertida se expresa en horas de funcionamiento de un motor Rolls-Royce Trent XWB-84 (el motor del Airbus A350-900) a potencia de ascenso (85 % de empuje, condición C/O del ciclo LTO ICAO).
+
+| Selección | Vertimiento | Horas de turbina Trent XWB-84 |
 |---|---|---|
-| Hospital Barros Luco | 8.500 MWh/año | 80 semanas |
-| Aeropuerto de Santiago | 58.901 MWh/año | 12 semanas |
-| Metro de Santiago | 487.599 MWh/año | 1 semana |
+| Día mínimo (24 ene) | 7.533 MWh | ~76 h |
+| Día típico (6 ene) | 14.665 MWh | ~147 h |
+| Día máximo (14 ene) | 34.385 MWh | ~345 h |
+| Todo enero | 468.175 MWh | ~4.701 h |
+
+**Sonificación:** al pulsar "Escuchar", se reproduce un motor de turbina (Rolls-Royce, CC0, Freesound) cuya velocidad de reproducción (`playbackRate`) varía entre 0,3× y 2,0× según el vertimiento seleccionado, simulando las RPM del motor.
 
 ---
 
@@ -56,6 +61,26 @@ Consumo total alrededor de 8.500 MWh/año
 ```
 
 **Fuente:** Ministerio de Energía — [Inauguración techo solar Hospital Barros Luco](https://energia.gob.cl/noticias/nacional/ministro-de-energia-y-ministra-de-salud-inauguran-techo-solar-del-hospital-barros-luco) (2017)
+
+### Motor Rolls-Royce Trent XWB-84 (Airbus A350-900)
+
+**Flujo de combustible a C/O (climb-out, 85 % de empuje):** 2,306 kg/s
+
+Dato certificado de la base de datos de emisiones de motores de la ICAO, administrada por EASA. La condición C/O corresponde al ciclo LTO (Landing-Takeoff) de certificación, medida a nivel del mar.
+
+**Cálculo de energía por hora de turbina:**
+
+```
+2,306 kg/s × 3.600 s/h × 43,2 MJ/kg ÷ 3.600.000 = 99,6 MWh por hora de turbina
+```
+
+Donde 43,2 MJ/kg es el poder calorífico inferior (LHV) del Jet A-1.
+
+**Fuente:** ICAO Aircraft Engine Emissions Databank, EASA, Issue 32 (marzo 2026). Descargable desde easa.europa.eu.
+
+**Nota metodológica:** el valor de 99,6 MWh/h corresponde a condiciones LTO (nivel del mar, 85 % de empuje). El consumo en crucero (35.000 ft, Mach 0,85) es aproximadamente el 30–35 % de este valor. Se usa la condición certificada C/O como referencia de potencia nominal del motor, no como consumo de vuelo típico.
+
+---
 
 ### Aeropuerto de Santiago (Arturo Merino Benítez)
 

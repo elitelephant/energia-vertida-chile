@@ -1,9 +1,14 @@
 // ── Equivalencia ──────────────────────────────────────────────────────────────
 
-const AEROPUERTO = {
-  nombre: "Aeropuerto de Santiago",
-  consumo_anual_mwh: 58901,
-  consumo_dia_mwh: 161.4,
+// Fuente primaria: ICAO Aircraft Engine Emissions Databank, EASA, Issue 32 (marzo 2026)
+// Motor: Rolls-Royce Trent XWB-84 — equipa el Airbus A350-900
+// Flujo a C/O (climb-out, 85 % empuje, nivel del mar, ciclo LTO ICAO): 2,306 kg/s
+// Energía: 2,306 kg/s × 3.600 s/h × 43,2 MJ/kg ÷ 3.600.000 MJ/MWh = 99,6 MWh por hora de turbina
+// Condición LTO (nivel del mar); el consumo en crucero es aprox. 30-35 % de este valor.
+const TURBINA = {
+  nombre: "Rolls-Royce Trent XWB-84",
+  avion: "Airbus A350-900",
+  consumo_hora_mwh: 99.6,
 };
 
 // ── Estado ────────────────────────────────────────────────────────────────────
@@ -140,20 +145,21 @@ function updatePanel() {
 function renderEquiv() {
   const container = document.getElementById("equiv-display");
   if (!container) return;
-  const semanas = Math.round(vertMwh / AEROPUERTO.consumo_dia_mwh / 7);
-  const label   = semanas === 1 ? "semana" : "semanas";
+  const horas = Math.round(vertMwh / TURBINA.consumo_hora_mwh);
   container.innerHTML = `
-    <div class="equiv-numero">${semanas} ${label}</div>
-    <div class="equiv-lugar">${AEROPUERTO.nombre}</div>
+    <div class="equiv-numero">${horas.toLocaleString("es-CL")}</div>
+    <div class="equiv-label">horas de turbina</div>
+    <div class="equiv-lugar">${TURBINA.nombre}</div>
+    <div class="equiv-sub">motor del ${TURBINA.avion}</div>
   `.trim();
 }
 
 // ── Sonido ────────────────────────────────────────────────────────────────────
 
-const VERT_MIN      = 9000;
-const VERT_MAX      = 470000;
-const RATE_MIN      = 0.35;  // RPM baja (poco vertimiento)
-const RATE_MAX      = 1.9;   // RPM alta (mucho vertimiento)
+const VERT_MIN      = 7000;   // por debajo del mínimo diario observado (7.533)
+const VERT_MAX      = 35000;  // por encima del máximo diario observado (34.385)
+const RATE_MIN      = 0.3;   // RPM baja (poco vertimiento)
+const RATE_MAX      = 2.0;   // RPM alta (mucho vertimiento)
 const PLAY_DURATION = 7;     // segundos
 
 let audioCtx          = null;
