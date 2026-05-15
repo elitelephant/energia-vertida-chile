@@ -127,7 +127,7 @@ h1 {
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  gap: 8px;
   user-select: none;
 }
 
@@ -147,11 +147,13 @@ h1 {
   justify-content: center;
   cursor: pointer;
   background: rgba(0, 0, 255, calc(0.06 + var(--pct) * 0.82));
-  opacity: 1;
+  outline: 2.5px solid transparent;
+  outline-offset: 0;
+  transition: outline-color 0.1s;
 }
 
 .cal-cell.selected {
-  opacity: 0.4;
+  outline-color: #111;
 }
 
 .cal-cell.weekend .cal-day {

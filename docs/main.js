@@ -25,8 +25,8 @@ function init() {
   document.getElementById("btn-select-all").addEventListener("click", selectAll);
   document.getElementById("btn-clear-all").addEventListener("click", clearAll);
   document.getElementById("btn-play-sound").addEventListener("click", () => {
-    if (activeSources.length > 0) stopFiums();
-    else playFiums();
+    if (activeSource) stopTurbine();
+    else playTurbine();
   });
 
   renderSelector();
@@ -150,22 +150,23 @@ function renderEquiv() {
 
 // ── Sonido ────────────────────────────────────────────────────────────────────
 
-const VERT_MIN  = 9000;
-const VERT_MAX  = 470000;
-const N_MIN     = 2;
-const N_MAX     = 10;
-const SPACING_S = 0.6;
+const VERT_MIN      = 9000;
+const VERT_MAX      = 470000;
+const RATE_MIN      = 0.35;  // RPM baja (poco vertimiento)
+const RATE_MAX      = 1.9;   // RPM alta (mucho vertimiento)
+const PLAY_DURATION = 7;     // segundos
 
 let audioCtx          = null;
-let audioBuffer       = null;
-let activeSources     = [];
+let turbineBuffer     = null;
+let activeSource      = null;
+let activeGain        = null;
 let soundDebounceTimer = null;
 
-function calcN(mwh) {
-  if (mwh <= 0) return 0;
+function calcPlaybackRate(mwh) {
+  if (mwh <= 0) return RATE_MIN;
   const v = Math.max(VERT_MIN, Math.min(VERT_MAX, mwh));
   const t = Math.log(v / VERT_MIN) / Math.log(VERT_MAX / VERT_MIN);
-  return Math.round(N_MIN + t * (N_MAX - N_MIN));
+  return RATE_MIN + t * (RATE_MAX - RATE_MIN);
 }
 
 function ensureAudioCtx() {
@@ -174,62 +175,86 @@ function ensureAudioCtx() {
   return audioCtx;
 }
 
-function loadAudioBuffer() {
+function loadTurbineBuffer() {
   const ctx = ensureAudioCtx();
-  if (audioBuffer) return Promise.resolve(audioBuffer);
+  if (turbineBuffer) return Promise.resolve(turbineBuffer);
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", "audio/air-move.mp3");
+    xhr.open("GET", "audio/turbine.flac");
     xhr.responseType = "arraybuffer";
     xhr.onload  = () => ctx.decodeAudioData(xhr.response)
-      .then(buf => { audioBuffer = buf; resolve(buf); }).catch(reject);
-    xhr.onerror = reject;
+      .then(buf => { turbineBuffer = buf; resolve(buf); }).catch(reject);
+    xhr.onerror = () => reject(new Error("No se pudo cargar audio/turbine.flac — servir con HTTP server"));
     xhr.send();
   });
 }
 
-function stopFiums() {
-  activeSources.forEach(s => { try { s.stop(0); } catch(e) {} });
-  activeSources = [];
+function setBtnState(playing) {
   const btn = document.getElementById("btn-play-sound");
-  btn.classList.remove("playing");
-  btn.innerHTML = '<i data-lucide="volume-2"></i> Escuchar';
+  if (!btn) return;
+  btn.classList.toggle("playing", playing);
+  btn.innerHTML = playing
+    ? '<i data-lucide="volume-x"></i> Detener'
+    : '<i data-lucide="volume-2"></i> Escuchar';
   lucide.createIcons({ nodes: [btn] });
 }
 
-function playFiums() {
-  loadAudioBuffer().then(buf => {
-    stopFiums();
-    const n = calcN(vertMwh);
-    if (n === 0) return;
-
+function stopTurbine() {
+  if (activeGain) {
     const ctx = ensureAudioCtx();
-    const btn = document.getElementById("btn-play-sound");
-    btn.classList.add("playing");
-    btn.innerHTML = '<i data-lucide="volume-x"></i> Detener';
-    lucide.createIcons({ nodes: [btn] });
+    activeGain.gain.cancelScheduledValues(ctx.currentTime);
+    activeGain.gain.setValueAtTime(activeGain.gain.value, ctx.currentTime);
+    activeGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+  }
+  if (activeSource) {
+    const src = activeSource;
+    setTimeout(() => { try { src.stop(0); } catch(e) {} }, 350);
+    activeSource = null;
+    activeGain   = null;
+  }
+  setBtnState(false);
+}
 
-    for (let i = 0; i < n; i++) {
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.playbackRate.value = 1;
-      src.connect(ctx.destination);
-      src.start(ctx.currentTime + i * SPACING_S);
-      activeSources.push(src);
-    }
+function playTurbine() {
+  loadTurbineBuffer().then(buf => {
+    stopTurbine();
 
-    const totalMs = ((n - 1) * SPACING_S + buf.duration) * 1000 + 200;
-    setTimeout(() => {
-      activeSources = [];
-      btn.classList.remove("playing");
-      btn.textContent = "▶ Escuchar";
-    }, totalMs);
-  });
+    const ctx  = ensureAudioCtx();
+    const rate = calcPlaybackRate(vertMwh);
+
+    const src  = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop   = true;
+    src.playbackRate.value = rate;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 0.8);
+    gain.gain.setValueAtTime(0.85, ctx.currentTime + PLAY_DURATION - 1.2);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + PLAY_DURATION);
+
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(ctx.currentTime);
+    src.stop(ctx.currentTime + PLAY_DURATION);
+
+    activeSource = src;
+    activeGain   = gain;
+    setBtnState(true);
+
+    src.onended = () => {
+      if (activeSource === src) {
+        activeSource = null;
+        activeGain   = null;
+        setBtnState(false);
+      }
+    };
+  }).catch(err => console.warn(err.message));
 }
 
 function scheduleSound() {
   clearTimeout(soundDebounceTimer);
-  soundDebounceTimer = setTimeout(playFiums, 500);
+  soundDebounceTimer = setTimeout(playTurbine, 500);
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
