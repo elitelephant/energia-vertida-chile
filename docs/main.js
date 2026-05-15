@@ -119,12 +119,11 @@ function updatePanel() {
   vertMwh = Math.round(totalV);
 
   document.getElementById("loss-number").textContent =
-    vertMwh.toLocaleString("es-CL") + " MWh";
+    vertMwh.toLocaleString("es-CL");
 
   const n = dates.length;
-  let subText;
-  subText = n === 0 ? "selecciona días en el calendario" : "";
-  document.getElementById("loss-sub").textContent = subText;
+  document.getElementById("loss-sub").textContent =
+    n === 0 ? "selecciona días en el calendario" : "MWh vertidos";
 
 }
 
