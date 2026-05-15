@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Energía vertida en Chile</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
@@ -11,15 +12,14 @@
   <main>
 
     <header>
-      <h1>El vertimiento de energía en enero de 2024</h1>
-      <p class="causa">En el norte de Chile, las plantas renovables generan más energía de la que la red puede transportar. Cuando eso ocurre, el exceso que no puede transmitirse simplemente se pierde. A eso se le llama <strong>vertimiento</strong>. En enero de 2024, ese desperdicio fue significativo.</p>
+      <h1>La energía renovable que Chile no usa</h1>
+      <p class="causa">En el norte de Chile, las plantas renovables generan más energía de la que la red puede transportar. Cuando eso ocurre, el exceso que no puede transmitirse simplemente se pierde. A eso se le llama <strong>vertimiento</strong>.</p>
     </header>
 
     <div id="panels">
 
       <div id="panel-calendar">
         <div class="cal-main">
-          <p class="panel-label">Enero 2024</p>
           <div id="selector-viz"></div>
           <div class="cal-actions">
             <button id="btn-select-all">Seleccionar todo</button>
@@ -31,16 +31,15 @@
         </div>
       </div>
 
-      <div id="panel-loss">
-        <p class="panel-label">Energía generada en exceso que se perdió</p>
-        <p class="loss-number" id="loss-number">14.665 MWh</p>
-        <p class="loss-sub" id="loss-sub">vertidos el 6 de enero de 2024</p>
-        <p class="loss-context" id="loss-context">el 7% de toda la energía generada ese día</p>
-      </div>
-
-      <div id="panel-equiv">
-        <p class="panel-label">Equivale a</p>
-        <div id="equiv-display"></div>
+      <div id="panel-right">
+        <div id="equiv-text">
+          <div id="equiv-display"></div>
+          <div id="loss-block">
+            <p class="loss-number" id="loss-number">14.665 MWh</p>
+            <p class="loss-sub" id="loss-sub">vertidos el 6 de enero de 2024</p>
+          </div>
+        </div>
+        <div id="turbine-grid"></div>
       </div>
 
     </div>
@@ -48,8 +47,8 @@
     <footer>
       <p><strong>Fuentes:</strong></p>
       <ul>
-        <li>Generación y demanda: Coordinador Eléctrico Nacional (SIPub API)</li>
-        <li>Flujo de combustible Trent XWB-84: ICAO Aircraft Engine Emissions Databank, EASA, Issue 32 (marzo 2026) — flujo C/O = 2,306 kg/s a 85 % de empuje</li>
+        <li>Coordinador Eléctrico Nacional</li>
+        <li>Agencia Europea de Seguridad Aérea</li>
       </ul>
     </footer>
 

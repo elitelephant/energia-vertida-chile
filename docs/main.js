@@ -37,7 +37,8 @@ function init() {
   renderSelector();
   updatePanel();
   renderEquiv();
-  lucide.createIcons();
+  renderTurbineGrid();
+  setBtnState(false);
 }
 
 function selectAll() {
@@ -56,17 +57,16 @@ function refresh() {
   renderSelector();
   updatePanel();
   renderEquiv();
+  renderTurbineGrid();
 }
 
-// ── Selector ──────────────────────────────────────────────────────────────────
+// ── Calendar ──────────────────────────────────────────────────────────────────
 
 function renderSelector() {
   const container = document.getElementById("selector-viz");
   container.innerHTML = "";
   buildCalendar(container);
 }
-
-// ── Calendar ──────────────────────────────────────────────────────────────────
 
 function buildCalendar(container) {
   const values = JAN_DAYS.map(d => DAILY_TOTALS[d]?.vert ?? 0);
@@ -115,8 +115,7 @@ function buildCalendar(container) {
 
 function updatePanel() {
   const dates  = JAN_DAYS.filter(d => state.selectedDays.has(d));
-  const totalV = dates.reduce((s, d) => s + (DAILY_TOTALS[d]?.vert     ?? 0), 0);
-  const totalG = dates.reduce((s, d) => s + (DAILY_TOTALS[d]?.genTotal ?? 0), 0);
+  const totalV = dates.reduce((s, d) => s + (DAILY_TOTALS[d]?.vert ?? 0), 0);
   vertMwh = Math.round(totalV);
 
   document.getElementById("loss-number").textContent =
@@ -124,23 +123,15 @@ function updatePanel() {
 
   const n = dates.length;
   let subText;
-  if (n === 0)       subText = "selecciona días en el calendario";
-  else if (n === 1)  subText = `vertidos el ${formatDate(dates[0])}`;
-  else if (n === 31) subText = "vertidos en enero de 2024";
-  else               subText = `vertidos en ${n} días de enero de 2024`;
+  subText = n === 0 ? "selecciona días en el calendario" : "";
   document.getElementById("loss-sub").textContent = subText;
 
-  if (totalG > 0 && n > 0) {
-    const pct    = Math.round(totalV / totalG * 100);
-    const period = n === 1 ? " ese día" : " en ese período";
-    document.getElementById("loss-context").textContent =
-      `el ${pct}% de toda la energía generada${period}`;
-  } else {
-    document.getElementById("loss-context").textContent = "";
-  }
 }
 
 // ── Equivalencia ─────────────────────────────────────────────────────────────
+
+const TOTAL_ICONOS = 16;
+const HORAS_ENERO  = 4701; // todo enero → todas activas
 
 function renderEquiv() {
   const container = document.getElementById("equiv-display");
@@ -149,30 +140,55 @@ function renderEquiv() {
   container.innerHTML = `
     <div class="equiv-numero">${horas.toLocaleString("es-CL")}</div>
     <div class="equiv-label">horas de turbina</div>
-    <div class="equiv-lugar">${TURBINA.nombre}</div>
-    <div class="equiv-sub">motor del ${TURBINA.avion}</div>
   `.trim();
+}
+
+function renderTurbineGrid() {
+  const grid = document.getElementById("turbine-grid");
+  if (!grid) return;
+  const horas   = Math.round(vertMwh / TURBINA.consumo_hora_mwh);
+  const nActive = Math.min(TOTAL_ICONOS, Math.round(horas / HORAS_ENERO * TOTAL_ICONOS));
+  grid.innerHTML = "";
+  for (let i = 0; i < TOTAL_ICONOS; i++) {
+    const wrap = document.createElement("div");
+    wrap.className = "turbine-icon-wrap " + (i < nActive ? "active" : "inactive");
+    wrap.innerHTML = '<i data-lucide="loader-pinwheel"></i>';
+    grid.appendChild(wrap);
+  }
+  lucide.createIcons({ nodes: [grid] });
+  if (activeSource) setTurbineSpinning(true, activeRate);
 }
 
 // ── Sonido ────────────────────────────────────────────────────────────────────
 
-const VERT_MIN      = 7000;   // por debajo del mínimo diario observado (7.533)
-const VERT_MAX      = 35000;  // por encima del máximo diario observado (34.385)
-const RATE_MIN      = 0.3;   // RPM baja (poco vertimiento)
-const RATE_MAX      = 2.0;   // RPM alta (mucho vertimiento)
+const HORA_MIN      = 76;    // horas turbina día mínimo (24 ene 2024, 7.533 MWh)
+const HORA_MAX      = 345;   // horas turbina día máximo (14 ene 2024, 34.385 MWh)
+const RATE_MIN      = 0.3;   // velocidad baja (día de menor vertimiento)
+const RATE_MAX      = 2.0;   // velocidad alta (día de mayor vertimiento)
 const PLAY_DURATION = 7;     // segundos
 
-let audioCtx          = null;
-let turbineBuffer     = null;
-let activeSource      = null;
-let activeGain        = null;
+let audioCtx           = null;
+let turbineBuffer      = null;
+let activeSource       = null;
+let activeGain         = null;
+let activeRate         = null;
 let soundDebounceTimer = null;
 
-function calcPlaybackRate(mwh) {
-  if (mwh <= 0) return RATE_MIN;
-  const v = Math.max(VERT_MIN, Math.min(VERT_MAX, mwh));
-  const t = Math.log(v / VERT_MIN) / Math.log(VERT_MAX / VERT_MIN);
+function calcPlaybackRate(horas) {
+  const v = Math.max(HORA_MIN, Math.min(HORA_MAX, horas));
+  const t = Math.log(v / HORA_MIN) / Math.log(HORA_MAX / HORA_MIN);
   return RATE_MIN + t * (RATE_MAX - RATE_MIN);
+}
+
+function setTurbineSpinning(spinning, rate) {
+  const grid = document.getElementById("turbine-grid");
+  if (!grid) return;
+  if (spinning && rate) {
+    grid.style.setProperty("--spin-dur", (2 / rate).toFixed(2) + "s");
+    grid.classList.add("spinning");
+  } else {
+    grid.classList.remove("spinning");
+  }
 }
 
 function ensureAudioCtx() {
@@ -206,6 +222,8 @@ function setBtnState(playing) {
 }
 
 function stopTurbine() {
+  setTurbineSpinning(false);
+  activeRate = null;
   if (activeGain) {
     const ctx = ensureAudioCtx();
     activeGain.gain.cancelScheduledValues(ctx.currentTime);
@@ -222,11 +240,13 @@ function stopTurbine() {
 }
 
 function playTurbine() {
+  if (vertMwh <= 0) return;
+  const horas = Math.round(vertMwh / TURBINA.consumo_hora_mwh);
   loadTurbineBuffer().then(buf => {
     stopTurbine();
 
     const ctx  = ensureAudioCtx();
-    const rate = calcPlaybackRate(vertMwh);
+    const rate = calcPlaybackRate(horas);
 
     const src  = ctx.createBufferSource();
     src.buffer = buf;
@@ -246,13 +266,17 @@ function playTurbine() {
 
     activeSource = src;
     activeGain   = gain;
+    activeRate   = rate;
     setBtnState(true);
+    setTurbineSpinning(true, rate);
 
     src.onended = () => {
       if (activeSource === src) {
         activeSource = null;
         activeGain   = null;
+        activeRate   = null;
         setBtnState(false);
+        setTurbineSpinning(false);
       }
     };
   }).catch(err => console.warn(err.message));
@@ -260,7 +284,7 @@ function playTurbine() {
 
 function scheduleSound() {
   clearTimeout(soundDebounceTimer);
-  soundDebounceTimer = setTimeout(playTurbine, 500);
+  soundDebounceTimer = setTimeout(playTurbine, 1000);
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
