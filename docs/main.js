@@ -117,14 +117,6 @@ function updatePanel() {
   const dates  = JAN_DAYS.filter(d => state.selectedDays.has(d));
   const totalV = dates.reduce((s, d) => s + (DAILY_TOTALS[d]?.vert ?? 0), 0);
   vertMwh = Math.round(totalV);
-
-  document.getElementById("loss-number").textContent =
-    vertMwh.toLocaleString("es-CL");
-
-  const n = dates.length;
-  document.getElementById("loss-sub").textContent =
-    n === 0 ? "selecciona días en el calendario" : "MWh vertidos equivalen a";
-
 }
 
 // ── Equivalencia ─────────────────────────────────────────────────────────────
@@ -135,11 +127,16 @@ const HORAS_ENERO  = 82136; // todo enero → todas activas (468.175 MWh ÷ 5,7 
 function renderEquiv() {
   const container = document.getElementById("equiv-display");
   if (!container) return;
+  if (vertMwh === 0) {
+    container.innerHTML = `<div class="equiv-empty">selecciona días en el calendario</div>`;
+    return;
+  }
   const horas = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
   container.innerHTML = `
-    <div class="equiv-numero">${horas.toLocaleString("es-CL")}</div>
-    <div class="equiv-label">horas de una turbina eólica</div>
-    <div class="equiv-lugar">como las del ${TURBINA.parque}</div>
+    <p class="equiv-frase">
+      <span class="equiv-num-mwh">${vertMwh.toLocaleString("es-CL")}</span> MWh vertidos equivalen a
+      <span class="equiv-num-horas">${horas.toLocaleString("es-CL")}</span> horas de turbina eólica como las del ${TURBINA.parque}.
+    </p>
   `.trim();
 }
 

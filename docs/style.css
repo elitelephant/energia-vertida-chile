@@ -151,7 +151,16 @@ h1 {
 }
 
 .cal-cell.weekend .cal-day {
-  font-weight: 700;
+  font-weight: 900;
+}
+
+.cal-month {
+  font-size: clamp(0.78rem, 1vw, 0.9rem);
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .cal-day {
@@ -208,18 +217,17 @@ h1 {
 }
 
 #equiv-text {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 12px;
-  flex-shrink: 0;
 }
 
 #equiv-display {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border-top: 1px solid #d0d0d0;
-  padding-top: 12px;
 }
 
 #loss-block {
@@ -229,6 +237,32 @@ h1 {
 }
 
 /* -- Equiv numbers & labels ------------------------------------------------- */
+
+.equiv-frase {
+  font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+  font-weight: 600;
+  color: #555;
+  line-height: 1.5;
+  word-spacing: 0.01em;
+  margin: 0;
+}
+
+.equiv-num-mwh {
+  font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+  font-weight: 900;
+  color: #222;
+}
+
+.equiv-num-horas {
+  font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.equiv-empty {
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  color: #aaa;
+}
 
 .equiv-numero {
   font-size: clamp(2.4rem, 5vw, 4rem);
