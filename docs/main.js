@@ -1,14 +1,14 @@
 // ── Equivalencia ──────────────────────────────────────────────────────────────
 
-// Fuente primaria: ICAO Aircraft Engine Emissions Databank, EASA, Issue 32 (marzo 2026)
-// Motor: Rolls-Royce Trent XWB-84 — equipa el Airbus A350-900
-// Flujo a C/O (climb-out, 85 % empuje, nivel del mar, ciclo LTO ICAO): 2,306 kg/s
-// Energía: 2,306 kg/s × 3.600 s/h × 43,2 MJ/kg ÷ 3.600.000 MJ/MWh = 99,6 MWh por hora de turbina
-// Condición LTO (nivel del mar); el consumo en crucero es aprox. 30-35 % de este valor.
+// Turbina: Nordex N163-5.7MW — modelo instalado en el Parque Eólico Atacama
+// Parque: 29 aerogeneradores Nordex N163-5.7MW, Freirina, Región de Atacama, Chile
+// Operativo desde enero 2023. Desarrollado por Repsol con Nordex.
+// Potencia unitaria: 5,70 MW → produce 5,7 MWh por cada hora de operación a plena carga
+// Fuente modelo base (N163/5.X, rotor 163 m): thewindpower.net/turbine_en_1721_nordex_n163-5.x.php
 const TURBINA = {
-  nombre: "Rolls-Royce Trent XWB-84",
-  avion: "Airbus A350-900",
-  consumo_hora_mwh: 99.6,
+  nombre: "Nordex N163-5.7MW",
+  parque: "Parque Eólico Atacama",
+  produccion_hora_mwh: 5.7,
 };
 
 // ── Estado ────────────────────────────────────────────────────────────────────
@@ -123,29 +123,30 @@ function updatePanel() {
 
   const n = dates.length;
   document.getElementById("loss-sub").textContent =
-    n === 0 ? "selecciona días en el calendario" : "MWh vertidos";
+    n === 0 ? "selecciona días en el calendario" : "MWh vertidos equivalen a";
 
 }
 
 // ── Equivalencia ─────────────────────────────────────────────────────────────
 
 const TOTAL_ICONOS = 16;
-const HORAS_ENERO  = 4701; // todo enero → todas activas
+const HORAS_ENERO  = 82136; // todo enero → todas activas (468.175 MWh ÷ 5,7 MW)
 
 function renderEquiv() {
   const container = document.getElementById("equiv-display");
   if (!container) return;
-  const horas = Math.round(vertMwh / TURBINA.consumo_hora_mwh);
+  const horas = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
   container.innerHTML = `
     <div class="equiv-numero">${horas.toLocaleString("es-CL")}</div>
-    <div class="equiv-label">horas de turbina</div>
+    <div class="equiv-label">horas de una turbina eólica</div>
+    <div class="equiv-lugar">como las del ${TURBINA.parque}</div>
   `.trim();
 }
 
 function renderTurbineGrid() {
   const grid = document.getElementById("turbine-grid");
   if (!grid) return;
-  const horas   = Math.round(vertMwh / TURBINA.consumo_hora_mwh);
+  const horas   = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
   const nActive = Math.min(TOTAL_ICONOS, Math.round(horas / HORAS_ENERO * TOTAL_ICONOS));
   grid.innerHTML = "";
   for (let i = 0; i < TOTAL_ICONOS; i++) {
@@ -160,8 +161,8 @@ function renderTurbineGrid() {
 
 // ── Sonido ────────────────────────────────────────────────────────────────────
 
-const HORA_MIN      = 76;    // horas turbina día mínimo (24 ene 2024, 7.533 MWh)
-const HORA_MAX      = 345;   // horas turbina día máximo (14 ene 2024, 34.385 MWh)
+const HORA_MIN      = 1281;  // horas turbina día mínimo (24 ene 2024, ~7.300 MWh ÷ 5,7 MW)
+const HORA_MAX      = 6033;  // horas turbina día máximo (14 ene 2024, 34.385 MWh ÷ 5,7 MW)
 const RATE_MIN      = 0.3;   // velocidad baja (día de menor vertimiento)
 const RATE_MAX      = 2.0;   // velocidad alta (día de mayor vertimiento)
 const PLAY_DURATION = 7;     // segundos

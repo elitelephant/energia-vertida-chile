@@ -25,27 +25,27 @@ Dos paneles principales:
 - **Izquierda — Calendario:** heatmap de enero 2024. El color de cada celda es proporcional al vertimiento de ese día (azul más intenso = más vertimiento). Click en cualquier día para seleccionar/deseleccionar. Botones "Seleccionar todo" y "Limpiar". Botón "Escuchar" para reproducir el sonido de turbina.
 
 - **Derecha — Equivalencia:** el panel se divide en dos columnas.
-  - *Texto:* número de horas de turbina equivalentes al vertimiento seleccionado, más los MWh totales.
-  - *Grid de turbinas:* 16 íconos de rueda (loader-pinwheel). El número de íconos activos (azul) es proporcional al vertimiento seleccionado respecto al total de enero (4.701 h = 16/16 activas). Los íconos inactivos se muestran en gris.
+  - *Texto:* los MWh vertidos del período seleccionado y las horas equivalentes de una turbina eólica como las del Parque Eólico Atacama ("X MWh vertidos equivalen a Y horas de una turbina eólica").
+  - *Grid de turbinas:* 16 íconos de rueda (loader-pinwheel). El número de íconos activos (azul) es proporcional al vertimiento seleccionado respecto al total de enero (82.136 h = 16/16 activas). Los íconos inactivos se muestran en gris.
 
-### Equivalencia: motor Rolls-Royce Trent XWB-84
+### Equivalencia: aerogenerador Nordex N163-5.7MW
 
-La energía vertida se expresa en horas de funcionamiento del motor Trent XWB-84 a potencia de ascenso (condición C/O del ciclo LTO ICAO).
+La energía vertida se expresa en horas que tardó una turbina eólica en generarla, operando a plena capacidad.
 
 | Selección | Vertimiento | Horas de turbina | Íconos activos |
 |---|---|---|---|
-| Día mínimo (24 ene) | 7.533 MWh | ~76 h | 1/16 |
-| Día típico (6 ene) | 14.665 MWh | ~147 h | 1/16 |
-| Día máximo (14 ene) | 34.385 MWh | ~345 h | 1/16 |
-| Todo enero | 468.175 MWh | ~4.701 h | 16/16 |
+| Día mínimo (24 ene) | ~7.300 MWh | ~1.281 h | 0/16 |
+| Día típico (6 ene) | 14.665 MWh | ~2.573 h | 0/16 |
+| Día máximo (14 ene) | 34.385 MWh | ~6.033 h | 1/16 |
+| Todo enero | 468.175 MWh | ~82.136 h | 16/16 |
 
 ### Sonificación
 
-Al pulsar "Escuchar" se reproduce una grabación de motor jet real (CC0, Freesound, sound ID 205581, qubodup). La velocidad de reproducción varía en escala logarítmica entre 0,3× y 2,0× según las horas de turbina del período seleccionado:
+Al pulsar "Escuchar" se reproduce una grabación de turbina eólica (CC0, Freesound, sound ID 205581, qubodup). La velocidad de reproducción varía en escala logarítmica entre 0,3× y 2,0× según las horas de turbina del período seleccionado:
 
-- **Día mínimo (76 h):** 0,3× — tono grave, RPM bajas
-- **Día máximo (345 h):** 2,0× — tono agudo, RPM altas
-- **Todo enero (4.701 h):** 2,0× (techo)
+- **Día mínimo (1.281 h):** 0,3× — tono grave, RPM bajas
+- **Día máximo (6.033 h):** 2,0× — tono agudo, RPM altas
+- **Todo enero (82.136 h):** 2,0× (techo)
 
 Los íconos activos del grid giran mientras suena el audio, a la misma velocidad que el playbackRate.
 
@@ -66,24 +66,25 @@ Duración: 7 segundos con fade in (0,8 s) y fade out (1,2 s). Debounce de 1 segu
 
 El vertimiento ocurre exclusivamente en el norte: Arica y Parinacota, Tarapacá, Antofagasta y Atacama.
 
-### Motor Rolls-Royce Trent XWB-84
+### Aerogenerador Nordex N163-5.7MW
 
-**Flujo de combustible a C/O (climb-out, 85 % de empuje):** 2,306 kg/s
+**Parque:** Parque Eólico Atacama, Freirina, Región de Atacama, Chile. 29 aerogeneradores Nordex N163-5.7MW. Capacidad total: 165 MW. Desarrollado por Repsol. Operativo desde enero 2023.
 
-**Fuente:** ICAO Aircraft Engine Emissions Databank, Agencia Europea de Seguridad Aérea (EASA), Issue 32 (marzo 2026).  
-Descargable desde easa.europa.eu/en/domains/environment/icao-aircraft-engine-emissions-databank
+**Potencia unitaria:** 5,70 MW → produce **5,7 MWh por hora de operación** a plena carga.
 
-**Cálculo:**
+**Fuente modelo base (N163/5.X):** The Wind Power, turbine ID 1721.  
+thewindpower.net/turbine_en_1721_nordex_n163-5.x.php  
+Rotor: 163 m de diámetro. Velocidad de arranque: 3 m/s. Velocidad de corte: 26 m/s.
+
+**Cálculo de equivalencia:**
 ```
-2,306 kg/s × 3.600 s/h × 43,2 MJ/kg ÷ 3.600.000 = 99,6 MWh por hora de turbina
+vertMwh ÷ 5,7 MW = horas que tardó una turbina eólica en generar esa energía
 ```
-
-> Condición LTO (nivel del mar, 85 % de empuje). El consumo en crucero es aproximadamente el 30–35 % de este valor. Se usa como referencia de potencia nominal certificada por la ICAO/EASA.
 
 ---
 
 ## Contexto académico
 
 Curso IIC2026 — Visualización de Información, Pontificia Universidad Católica de Chile.  
-Entrega 2 — Visualización interactiva + sonificación.  
+Entrega 3 — Visualización física, interactiva y con sonificación.  
 Grupo 20.
