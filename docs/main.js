@@ -29,6 +29,7 @@ const state = {
 function init() {
   document.getElementById("btn-select-all").addEventListener("click", selectAll);
   document.getElementById("btn-clear-all").addEventListener("click", clearAll);
+  document.getElementById("btn-connect-serial").addEventListener("click", connectSerial);
   document.getElementById("btn-play-sound").addEventListener("click", () => {
     if (activeSource) stopTurbine();
     else playTurbine();
@@ -58,6 +59,7 @@ function refresh() {
   updatePanel();
   renderEquiv();
   renderTurbineGrid();
+  sendSerialSpeed();
 }
 
 // ── Calendar ──────────────────────────────────────────────────────────────────
@@ -282,6 +284,49 @@ function playTurbine() {
 function scheduleSound() {
   clearTimeout(soundDebounceTimer);
   soundDebounceTimer = setTimeout(playTurbine, 1000);
+}
+
+// ── WebSerial ─────────────────────────────────────────────────────────────────
+
+let serialWriter = null;
+
+async function connectSerial() {
+  try {
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 9600 });
+    const encoder = new TextEncoderStream();
+    encoder.readable.pipeTo(port.writable);
+    serialWriter = encoder.writable.getWriter();
+    const btn = document.getElementById("btn-connect-serial");
+    btn.classList.add("connected");
+    btn.innerHTML = '<i data-lucide="cpu"></i> Arduino conectado';
+    lucide.createIcons({ nodes: [btn] });
+    sendSerialSpeed();
+    port.addEventListener("disconnect", () => {
+      serialWriter = null;
+      btn.classList.remove("connected");
+      btn.innerHTML = '<i data-lucide="cpu"></i> Conectar Arduino';
+      lucide.createIcons({ nodes: [btn] });
+    });
+  } catch (err) {
+    console.warn("WebSerial:", err.message);
+  }
+}
+
+async function sendSerialSpeed() {
+  if (!serialWriter) return;
+  const horas = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
+  let speed = 0;
+  if (horas > 0) {
+    const v = Math.max(HORA_MIN, Math.min(HORA_MAX, horas));
+    const t = Math.log(v / HORA_MIN) / Math.log(HORA_MAX / HORA_MIN);
+    speed = Math.round(10 + t * 90);
+  }
+  try {
+    await serialWriter.write(speed + "\n");
+  } catch (err) {
+    console.warn("Serial write:", err.message);
+  }
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
