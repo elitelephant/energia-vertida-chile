@@ -1,28 +1,37 @@
-// ── Equivalencia ──────────────────────────────────────────────────────────────
+// ── Turbina ───────────────────────────────────────────────────────────────────
 
-// Turbina: Nordex N163-5.7MW — modelo instalado en el Parque Eólico Atacama
-// Parque: 29 aerogeneradores Nordex N163-5.7MW, Freirina, Región de Atacama, Chile
-// Operativo desde enero 2023. Desarrollado por Repsol con Nordex.
-// Potencia unitaria: 5,70 MW → produce 5,7 MWh por cada hora de operación a plena carga
-// Fuente modelo base (N163/5.X, rotor 163 m): thewindpower.net/turbine_en_1721_nordex_n163-5.x.php
+// Nordex N163-5.7MW — Parque Eólico Atacama, Freirina, Región de Atacama
+// 29 unidades, operativo desde enero 2023, desarrollado por Repsol con Nordex
 const TURBINA = {
   nombre: "Nordex N163-5.7MW",
   parque: "Parque Eólico Atacama",
   produccion_hora_mwh: 5.7,
 };
 
-// ── Estado ────────────────────────────────────────────────────────────────────
+// ── Constantes ────────────────────────────────────────────────────────────────
 
 // DAILY_TOTALS viene de data/daily_totals.js (evita fetch con file://)
 const JAN_DAYS = Array.from({ length: 31 }, (_, i) =>
   new Date(Date.UTC(2024, 0, i + 1)).toISOString().slice(0, 10)
 );
 
-let vertMwh = 0;
+const TOTAL_ICONOS = 16;
+const HORA_MIN     = 1281;   // horas turbina día mínimo (24 ene, ~7.300 MWh)
+const HORA_MAX     = 6033;   // horas turbina día máximo (14 ene, ~34.385 MWh)
+const HORAS_ENERO  = 82136;  // horas totales enero → 16 íconos
+const RATE_MIN     = 0.3;    // playbackRate mínimo
+const RATE_MAX     = 2.0;    // playbackRate máximo
+const PLAY_DUR     = 6;     // duración fija de reproducción (segundos)
+const FADE_IN      = 0.8;    // fade-in del audio (segundos)
+const FADE_OUT     = 1.2;    // fade-out del audio (segundos)
+
+// ── Estado ────────────────────────────────────────────────────────────────────
 
 const state = {
-  selectedDays: new Set(JAN_DAYS), // todo enero por defecto
+  selectedDays: new Set(JAN_DAYS),
 };
+
+let vertMwh = 0;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
@@ -30,39 +39,29 @@ function init() {
   document.getElementById("btn-select-all").addEventListener("click", selectAll);
   document.getElementById("btn-clear-all").addEventListener("click", clearAll);
   document.getElementById("btn-connect-serial").addEventListener("click", connectSerial);
-  document.getElementById("btn-play-sound").addEventListener("click", () => {
-    if (activeSource) stopTurbine();
-    else playTurbine();
-  });
-
-  renderSelector();
-  updatePanel();
-  renderEquiv();
-  renderTurbineGrid();
+  document.getElementById("btn-play-sound").addEventListener("click", onPlayBtn);
+  refresh();
   setBtnState(false);
 }
 
 function selectAll() {
   JAN_DAYS.forEach(d => state.selectedDays.add(d));
   refresh();
-  scheduleSound();
 }
 
 function clearAll() {
   state.selectedDays.clear();
   refresh();
-  scheduleSound();
 }
 
 function refresh() {
-  renderSelector();
   updatePanel();
+  renderSelector();
   renderEquiv();
   renderTurbineGrid();
-  sendSerialSpeed();
 }
 
-// ── Calendar ──────────────────────────────────────────────────────────────────
+// ── Calendario ────────────────────────────────────────────────────────────────
 
 function renderSelector() {
   const container = document.getElementById("selector-viz");
@@ -98,13 +97,9 @@ function buildCalendar(container) {
     cell.innerHTML = `<span class="cal-day">${i + 1}</span>`;
 
     cell.addEventListener("click", () => {
-      if (state.selectedDays.has(date)) {
-        state.selectedDays.delete(date);
-      } else {
-        state.selectedDays.add(date);
-      }
+      if (state.selectedDays.has(date)) state.selectedDays.delete(date);
+      else state.selectedDays.add(date);
       refresh();
-      scheduleSound();
     });
 
     grid.appendChild(cell);
@@ -113,26 +108,20 @@ function buildCalendar(container) {
   container.appendChild(grid);
 }
 
-// ── Panel número ──────────────────────────────────────────────────────────────
+// ── Panel ─────────────────────────────────────────────────────────────────────
 
 function updatePanel() {
-  const dates  = JAN_DAYS.filter(d => state.selectedDays.has(d));
-  const totalV = dates.reduce((s, d) => s + (DAILY_TOTALS[d]?.vert ?? 0), 0);
-  vertMwh = Math.round(totalV);
+  vertMwh = Math.round(
+    JAN_DAYS.reduce((s, d) =>
+      state.selectedDays.has(d) ? s + (DAILY_TOTALS[d]?.vert ?? 0) : s, 0)
+  );
 }
 
-// ── Equivalencia ─────────────────────────────────────────────────────────────
-
-const TOTAL_ICONOS = 16;
-const HORAS_ENERO  = 82136; // todo enero → todas activas (468.175 MWh ÷ 5,7 MW)
+// ── Equivalencia ──────────────────────────────────────────────────────────────
 
 function renderEquiv() {
   const container = document.getElementById("equiv-display");
   if (!container) return;
-  if (vertMwh === 0) {
-    container.innerHTML = `<div class="equiv-empty">selecciona días en el calendario</div>`;
-    return;
-  }
   const horas = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
   container.innerHTML = `
     <p class="equiv-frase">
@@ -142,11 +131,20 @@ function renderEquiv() {
   `.trim();
 }
 
+// ── Turbine grid ──────────────────────────────────────────────────────────────
+
+function calcActiveIcons(horas) {
+  if (horas <= 0) return 0;
+  const t = Math.min(1, horas / HORAS_ENERO);  // 0–1 lineal, tope = todo enero
+  const curved = Math.pow(t, 0.4);             // potencia suave: 1 día → 2–4 íconos
+  return Math.max(1, Math.round(curved * TOTAL_ICONOS));
+}
+
 function renderTurbineGrid() {
   const grid = document.getElementById("turbine-grid");
   if (!grid) return;
   const horas   = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
-  const nActive = Math.min(TOTAL_ICONOS, Math.round(horas / HORAS_ENERO * TOTAL_ICONOS));
+  const nActive = calcActiveIcons(horas);
   grid.innerHTML = "";
   for (let i = 0; i < TOTAL_ICONOS; i++) {
     const wrap = document.createElement("div");
@@ -158,27 +156,6 @@ function renderTurbineGrid() {
   if (activeSource) setTurbineSpinning(true, activeRate);
 }
 
-// ── Sonido ────────────────────────────────────────────────────────────────────
-
-const HORA_MIN      = 1281;  // horas turbina día mínimo (24 ene 2024, ~7.300 MWh ÷ 5,7 MW)
-const HORA_MAX      = 6033;  // horas turbina día máximo (14 ene 2024, 34.385 MWh ÷ 5,7 MW)
-const RATE_MIN      = 0.3;   // velocidad baja (día de menor vertimiento)
-const RATE_MAX      = 2.0;   // velocidad alta (día de mayor vertimiento)
-const PLAY_DURATION = 7;     // segundos
-
-let audioCtx           = null;
-let turbineBuffer      = null;
-let activeSource       = null;
-let activeGain         = null;
-let activeRate         = null;
-let soundDebounceTimer = null;
-
-function calcPlaybackRate(horas) {
-  const v = Math.max(HORA_MIN, Math.min(HORA_MAX, horas));
-  const t = Math.log(v / HORA_MIN) / Math.log(HORA_MAX / HORA_MIN);
-  return RATE_MIN + t * (RATE_MAX - RATE_MIN);
-}
-
 function setTurbineSpinning(spinning, rate) {
   const grid = document.getElementById("turbine-grid");
   if (!grid) return;
@@ -188,6 +165,20 @@ function setTurbineSpinning(spinning, rate) {
   } else {
     grid.classList.remove("spinning");
   }
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+
+let audioCtx      = null;
+let turbineBuffer = null;
+let activeSource  = null;
+let activeGain    = null;
+let activeRate    = null;
+
+function calcPlaybackRate(horas) {
+  const v = Math.max(HORA_MIN, Math.min(HORA_MAX, horas));
+  const t = Math.log(v / HORA_MIN) / Math.log(HORA_MAX / HORA_MIN);
+  return RATE_MIN + t * (RATE_MAX - RATE_MIN);
 }
 
 function ensureAudioCtx() {
@@ -205,7 +196,7 @@ function loadTurbineBuffer() {
     xhr.responseType = "arraybuffer";
     xhr.onload  = () => ctx.decodeAudioData(xhr.response)
       .then(buf => { turbineBuffer = buf; resolve(buf); }).catch(reject);
-    xhr.onerror = () => reject(new Error("No se pudo cargar audio/turbine.flac — servir con HTTP server"));
+    xhr.onerror = () => reject(new Error("No se pudo cargar audio — servir con HTTP"));
     xhr.send();
   });
 }
@@ -220,70 +211,75 @@ function setBtnState(playing) {
   lucide.createIcons({ nodes: [btn] });
 }
 
-function stopTurbine() {
-  setTurbineSpinning(false);
-  activeRate = null;
-  if (activeGain) {
-    const ctx = ensureAudioCtx();
-    activeGain.gain.cancelScheduledValues(ctx.currentTime);
-    activeGain.gain.setValueAtTime(activeGain.gain.value, ctx.currentTime);
-    activeGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
-  }
-  if (activeSource) {
-    const src = activeSource;
-    setTimeout(() => { try { src.stop(0); } catch(e) {} }, 350);
-    activeSource = null;
-    activeGain   = null;
-  }
-  setBtnState(false);
+function onPlayBtn() {
+  if (activeSource) stopAll();
+  else startAll();
 }
 
-function playTurbine() {
+function startAll() {
   if (vertMwh <= 0) return;
-  const horas = Math.round(vertMwh / TURBINA.consumo_hora_mwh);
-  loadTurbineBuffer().then(buf => {
-    stopTurbine();
+  const horas = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
 
+  loadTurbineBuffer().then(buf => {
     const ctx  = ensureAudioCtx();
     const rate = calcPlaybackRate(horas);
+    const now  = ctx.currentTime;
 
-    const src  = ctx.createBufferSource();
+    const src = ctx.createBufferSource();
     src.buffer = buf;
     src.loop   = true;
     src.playbackRate.value = rate;
 
     const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 0.8);
-    gain.gain.setValueAtTime(0.85, ctx.currentTime + PLAY_DURATION - 1.2);
-    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + PLAY_DURATION);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.85, now + FADE_IN);
+    gain.gain.setValueAtTime(0.85, now + PLAY_DUR - FADE_OUT);
+    gain.gain.linearRampToValueAtTime(0, now + PLAY_DUR);
 
     src.connect(gain);
     gain.connect(ctx.destination);
-    src.start(ctx.currentTime);
-    src.stop(ctx.currentTime + PLAY_DURATION);
+    src.start(now);
+    src.stop(now + PLAY_DUR);
 
     activeSource = src;
     activeGain   = gain;
     activeRate   = rate;
-    setBtnState(true);
+
+    // arrancan los tres juntos
     setTurbineSpinning(true, rate);
+    sendSerialSpeed(calcSerialSpeed(vertMwh));
+    setBtnState(true);
 
     src.onended = () => {
-      if (activeSource === src) {
-        activeSource = null;
-        activeGain   = null;
-        activeRate   = null;
-        setBtnState(false);
-        setTurbineSpinning(false);
-      }
+      if (activeSource !== src) return;
+      activeSource = null;
+      activeGain   = null;
+      activeRate   = null;
+      setTurbineSpinning(false);
+      sendSerialSpeed(0);
+      setBtnState(false);
     };
   }).catch(err => console.warn(err.message));
 }
 
-function scheduleSound() {
-  clearTimeout(soundDebounceTimer);
-  soundDebounceTimer = setTimeout(playTurbine, 1000);
+function stopAll() {
+  // íconos paran de inmediato
+  setTurbineSpinning(false);
+  // servo para de inmediato
+  sendSerialSpeed(0);
+  // audio: fade rápido luego stop
+  if (activeGain) {
+    const ctx = ensureAudioCtx();
+    activeGain.gain.cancelScheduledValues(ctx.currentTime);
+    activeGain.gain.setValueAtTime(activeGain.gain.value, ctx.currentTime);
+    activeGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15);
+  }
+  const src = activeSource;
+  activeSource = null;
+  activeGain   = null;
+  activeRate   = null;
+  setBtnState(false);
+  if (src) setTimeout(() => { try { src.stop(0); } catch(e) {} }, 200);
 }
 
 // ── WebSerial ─────────────────────────────────────────────────────────────────
@@ -295,13 +291,12 @@ async function connectSerial() {
     const port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
     const encoder = new TextEncoderStream();
-    encoder.readable.pipeTo(port.writable);
+    encoder.readable.pipeTo(port.writable).catch(err => console.warn("Serial pipe:", err));
     serialWriter = encoder.writable.getWriter();
     const btn = document.getElementById("btn-connect-serial");
     btn.classList.add("connected");
     btn.innerHTML = '<i data-lucide="cpu"></i> Arduino conectado';
     lucide.createIcons({ nodes: [btn] });
-    sendSerialSpeed();
     port.addEventListener("disconnect", () => {
       serialWriter = null;
       btn.classList.remove("connected");
@@ -313,15 +308,18 @@ async function connectSerial() {
   }
 }
 
-async function sendSerialSpeed() {
+function calcSerialSpeed(mwh) {
+  if (mwh <= 0) return 0;
+  const MWH_MIN = 7300;
+  const MWH_MAX = 468175;
+  const v   = Math.max(MWH_MIN, Math.min(MWH_MAX, mwh));
+  const raw = Math.log(v / MWH_MIN) / Math.log(MWH_MAX / MWH_MIN);
+  const t   = raw * raw * (3 - 2 * raw); // smoothstep
+  return Math.round(t * 70 + 20);        // 20–90
+}
+
+async function sendSerialSpeed(speed) {
   if (!serialWriter) return;
-  const horas = Math.round(vertMwh / TURBINA.produccion_hora_mwh);
-  let speed = 0;
-  if (horas > 0) {
-    const v = Math.max(HORA_MIN, Math.min(HORA_MAX, horas));
-    const t = Math.log(v / HORA_MIN) / Math.log(HORA_MAX / HORA_MIN);
-    speed = Math.round(10 + t * 90);
-  }
   try {
     await serialWriter.write(speed + "\n");
   } catch (err) {
